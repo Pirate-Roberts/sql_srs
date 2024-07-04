@@ -20,12 +20,14 @@ muffin,3
 
 food_items = pd.read_csv(io.StringIO(csv2))
 
-option = st.selectbox(
-    "How would you like to be contacted ?",
-    ("Joins", "GroupBy", "Windows Functions", ""),
-    index=None,
-    placeholder="Select theme...",
-)
+# Menu déroulant dans la sidebar
+with st.sidebar:
+    option = st.selectbox(
+        "How would you like to be contacted ?",
+        ("Joins", "GroupBy", "Windows Functions", ""),
+        index=None,
+        placeholder="Select theme...",
+    )
 
 st.write('You selected:', option)
 
