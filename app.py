@@ -20,6 +20,17 @@ muffin,3
 
 food_items = pd.read_csv(io.StringIO(csv2))
 
+# Menu déroulant dans la sidebar
+with st.sidebar:
+    option = st.selectbox(
+        "How would you like to be contacted ?",
+        ("Joins", "GroupBy", "Windows Functions", ""),
+        index=None,
+        placeholder="Select theme...",
+    )
+
+    st.write('You selected:', option)
+
 answer = """
 SELECT *
 FROM beverages
@@ -44,6 +55,3 @@ with tab1:
     st.dataframe(beverages)
     st.write("table : expected")
     st.dataframe(solution)
-
-with tab2:
-    st.write(answer)
