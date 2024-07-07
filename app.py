@@ -29,7 +29,7 @@ with st.sidebar:
         placeholder="Select theme...",
     )
 
-st.write('You selected:', option)
+    st.write('You selected:', option)
 
 answer = """
 SELECT *
