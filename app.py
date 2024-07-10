@@ -1,4 +1,9 @@
 # pylint: disable=missing-module-docstring
+# pylint: disable=unspecified-encoding
+# pylint: disable=unused-import
+import ast
+import os
+
 import duckdb
 import streamlit as st
 
@@ -15,9 +20,10 @@ with st.sidebar:
 
     st.write("You selected:", theme)
 
-    exercise_df = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}'").df()
+    exercise_df = con.execute(
+        f"SELECT * FROM memory_state WHERE theme = '{theme}'"
+    ).df()
     st.write(exercise_df)
-    st.dataframe(exercise_df)
 
 ANSWER = """
 SELECT *
@@ -30,10 +36,10 @@ CROSS JOIN food_items
 st.header("Entrez votre requète SQL:")
 query = st.text_area(label="Votre code SQL ici", key="user_input")
 
-#if query:
-#    result = duckdb.sql(query).df()
-#    st.dataframe(result)
-#
+if query:
+    result = con.execute(query).df()
+    st.dataframe(result)
+
 #    if len(result.columns) != len(solution_df.columns):
 #        st.write("Some columns are missing")
 #
@@ -54,23 +60,22 @@ query = st.text_area(label="Votre code SQL ici", key="user_input")
 #    except KeyError as e:
 #        print()
 #
-#tab1, tab2 = st.tabs(["Tables", "Solution"])
-#
-#with tab1:
-#    st.write("table : beverages")
-#    st.dataframe(beverages)
-#    st.write("table : food_items")
-#    st.dataframe(food_items)
-#    st.write("table : expected")
-#    st.dataframe(solution_df)
-#
-#with tab2:
-#    st.write(ANSWER)
-#
-#
-#def my_func():
-#    """
-#    Docstring
-#    :return:
-#    """
-#    print("prout")
+tab1, tab2 = st.tabs(["Tables", "Solution"])
+
+exercise_tables = exercise_df.loc[0, "tables"]
+solution_file = exercise_df.loc[0, "solution"]
+with open(os.path.join("solutions", solution_file), "r") as f:
+    solution_query = f.read()
+
+with tab1:
+    for table in exercise_tables:
+        st.write(f"table : {table}")
+        table_df = con.execute(f"SELECT * FROM {table}").df()
+        st.dataframe(table_df)
+
+    st.write("table : Solution")
+    solution_df = con.execute(solution_query).df()
+    st.dataframe(solution_df)
+
+with tab2:
+    st.write(solution_query)
