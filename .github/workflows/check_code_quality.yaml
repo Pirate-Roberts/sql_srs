@@ -13,6 +13,6 @@ jobs:
           pip install -r requirements.txt
       - run: |
           black --check --verbose .
-          pylint --verbose app.py
           isort --verbose .
+          pylint --verbose app.py
           
