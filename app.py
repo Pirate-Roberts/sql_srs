@@ -29,11 +29,13 @@ with st.sidebar:
         placeholder="Select theme...",
     )
 
-    st.write("You selected:", theme)
+    if theme:
+        st.write(f"You selected: {theme}")
+        select_exercise_query = f"SELECT * FROM memory_state WHERE theme = '{theme}' ORDER BY last_reviewed"
+    else:
+        select_exercise_query = "SELECT * FROM memory_state ORDER BY last_reviewed"
 
-    exercise_df = con.execute(
-        f"SELECT * FROM memory_state WHERE theme = '{theme}' ORDER BY last_reviewed"
-    ).df()
+    exercise_df = con.execute(select_exercise_query).df()
     st.write(exercise_df)
 
     solution_file = exercise_df.loc[0, "solution"]
