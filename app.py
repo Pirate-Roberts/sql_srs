@@ -22,9 +22,14 @@ con = duckdb.connect(database="data/exercises_sql_tables.duckdb", read_only=Fals
 
 # Menu déroulant dans la sidebar
 with st.sidebar:
+    theme_list = (
+        con.execute("SELECT DISTINCT theme FROM memory_state")
+        .df()["theme"]
+        .unique()
+    )
     theme = st.selectbox(
         "How would you like to be contacted ?",
-        ("cross_joins", "Joins", "GroupBy", "window_functions"),
+        theme_list,
         index=None,
         placeholder="Select theme...",
     )
