@@ -1,7 +1,7 @@
 name: check_code_quality
 on: pull_request
 jobs:
-  black: # nom du job
+  pep8: # nom du job
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
@@ -10,6 +10,9 @@ jobs:
           python-version: 3.11
       - run: | # | -> multiligne
           python -m pip install --upgrade pip
-          pip install black
+          pip install -r requirements.txt
       - run: |
           black --check --verbose .
+          isort --verbose .
+          pylint --verbose app.py
+          

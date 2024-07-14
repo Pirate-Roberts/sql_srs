@@ -1,51 +1,51 @@
 # pylint: disable=missing-module-docstring
-import io
+# pylint: disable=unspecified-encoding
+# pylint: disable=unused-import
+# pylint: disable=exec-used
+import logging
+import os
 
 import duckdb
-import pandas as pd
 import streamlit as st
 
-CSV = """
-beverage,price
-orange juice,2.5
-Expresso,2
-Tea,3
-"""
-beverages = pd.read_csv(io.StringIO(CSV))
+if "data" not in os.listdir():
+    logging.error(os.listdir())
+    logging.error("Creating folder data/")
+    os.mkdir("data")
 
-CSV2 = """
-food_item,food_price
-cookie,2.5
-chocolatine,2
-muffin,3
-"""
+if "exercises_sql_tables.duckdb" not in os.listdir("data"):
+    with open("init_db.py", "r") as init_db:
+        exec(init_db.read())
 
-food_items = pd.read_csv(io.StringIO(CSV2))
+# Connection à la database
+con = duckdb.connect(database="data/exercises_sql_tables.duckdb", read_only=False)
 
 # Menu déroulant dans la sidebar
 with st.sidebar:
-    option = st.selectbox(
+    theme = st.selectbox(
         "How would you like to be contacted ?",
-        ("Joins", "GroupBy", "Windows Functions", ""),
+        ("cross_joins", "Joins", "GroupBy", "window_functions"),
         index=None,
         placeholder="Select theme...",
     )
 
-    st.write("You selected:", option)
+    st.write("You selected:", theme)
 
-ANSWER = """
-SELECT *
-FROM beverages
-CROSS JOIN food_items
-"""
+    exercise_df = con.execute(
+        f"SELECT * FROM memory_state WHERE theme = '{theme}' ORDER BY last_reviewed"
+    ).df()
+    st.write(exercise_df)
 
-solution_df = duckdb.sql(ANSWER).df()
+    solution_file = exercise_df.loc[0, "solution"]
+    with open(os.path.join("solutions", solution_file), "r") as f:
+        solution_query = f.read()
+    solution_df = con.execute(solution_query).df()
 
 st.header("Entrez votre requète SQL:")
 query = st.text_area(label="Votre code SQL ici", key="user_input")
 
 if query:
-    result = duckdb.sql(query).df()
+    result = con.execute(query).df()
     st.dataframe(result)
 
     if len(result.columns) != len(solution_df.columns):
@@ -66,25 +66,23 @@ if query:
     try:
         st.dataframe(result.compare(solution_df))
     except KeyError as e:
-        print()
+        print(f"Erreur : {e}")
+    except ValueError as e:
+        print(f"Erreur : {e}")
 
 tab1, tab2 = st.tabs(["Tables", "Solution"])
 
 with tab1:
-    st.write("table : beverages")
-    st.dataframe(beverages)
-    st.write("table : food_items")
-    st.dataframe(food_items)
-    st.write("table : expected")
+    exercise_tables = exercise_df.loc[0, "tables"]
+    for table in exercise_tables:
+        st.write(f"table : {table}")
+        table_df = con.execute(f"SELECT * FROM {table}").df()
+        st.dataframe(table_df)
+
+    st.write("table : Solution")
     st.dataframe(solution_df)
 
 with tab2:
-    st.write(ANSWER)
+    st.write(solution_query)
 
-
-def my_func():
-    """
-    Docstring
-    :return:
-    """
-    print("prout")
+con.close()
