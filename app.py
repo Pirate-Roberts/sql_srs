@@ -58,7 +58,10 @@ def get_exercises(exercise_theme):
     """
     if exercise_theme:
         st.write(f"You selected: {exercise_theme}")
-        select_exercise_query = f"SELECT * FROM memory_state WHERE theme = '{exercise_theme}' ORDER BY last_reviewed"
+        select_exercise_query = (
+            f"SELECT * FROM memory_state WHERE theme = '{exercise_theme}' "
+            "ORDER BY last_reviewed"
+        )
     else:
         select_exercise_query = "SELECT * FROM memory_state ORDER BY last_reviewed"
     df = con.execute(select_exercise_query).df()
@@ -70,9 +73,7 @@ def get_exercises(exercise_theme):
 # Menu déroulant dans la sidebar
 with st.sidebar:
     theme_list = (
-        con.execute("SELECT DISTINCT theme FROM memory_state")
-        .df()["theme"]
-        .unique()
+        con.execute("SELECT DISTINCT theme FROM memory_state").df()["theme"].unique()
     )
     theme = st.selectbox(
         "How would you like to be contacted ?",
