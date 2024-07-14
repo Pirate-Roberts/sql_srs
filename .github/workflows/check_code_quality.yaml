@@ -15,4 +15,5 @@ jobs:
           black --check --verbose .
           isort --verbose .
           pylint --verbose app.py
+          pylint --verbose init_db.py
           
